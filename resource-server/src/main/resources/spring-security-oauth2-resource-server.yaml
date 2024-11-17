@@ -1,0 +1,12 @@
+logging:
+  level:
+    org.springframework.security: trace
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        opaque-token:
+          client-id: oidc-resource-server
+          client-secret: secret2
+          introspection-uri: http://localhost:8080/oauth2/introspect

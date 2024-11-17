@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Posts</title>
+</head>
+<body>
+<h1>Posts</h1>
+<div>
+    <a th:href="@{/posts/form}">글쓰기</a>
+</div>
+<div>
+    <table>
+        <thead>
+            <tr>
+                <th>제목</th>
+                <th>수정</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="post : ${pagedModel.content}">
+                <td><a th:href="@{/posts/{postId}(postId=${post.id})}">[[${post.title}]]</a></td>
+                <td><a th:href="@{/posts/{postId}/form(postId=${post.id})}">글수정</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

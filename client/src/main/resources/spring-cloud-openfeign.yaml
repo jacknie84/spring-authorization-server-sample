@@ -1,0 +1,17 @@
+logging:
+  level:
+    com.jacknie.sample.client: debug
+
+spring:
+  cloud:
+    openfeign:
+      oauth2:
+        enabled: true
+        clientRegistrationId: oidc-client
+      okhttp:
+        enabled: true
+      client:
+        config:
+          post-api:
+            url: http://localhost:8090
+            loggerLevel: full
