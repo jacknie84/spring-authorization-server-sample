@@ -70,10 +70,10 @@ class JwtEncodingContextCustomizer: OAuth2TokenCustomizer<JwtEncodingContext> {
         val picture: String? get() = null
         val website: String? get() = null
         val gender: String? get() = null
-        val birthdate: Long? get() = null
+        val birthdate: Date? get() = null
         val zoneInfo: ZoneId? get() = null
         val locale: Locale? get() = null
-        val updatedAt: Long? get() = null
+        val updatedAt: Date? get() = null
     }
 
     private class GithubUserInfo(private val user: OAuth2User): UserInfoStandardClaimSet {
@@ -81,7 +81,7 @@ class JwtEncodingContextCustomizer: OAuth2TokenCustomizer<JwtEncodingContext> {
         override val picture: String? get() = user.attributes["avatar_url"] as String?
         override val profile: String? get() = user.attributes["html_url"] as String?
         override val name: String? get() = user.attributes["name"] as String?
-        override val updatedAt: Long? get() = user.attributes["updated_at"]?.let { Instant.parse(it as String).epochSecond }
+        override val updatedAt: Date? get() = user.attributes["updated_at"]?.let { Date.from(Instant.parse(it as String)) }
     }
 
     private class NaverUserInfo(private val user: OAuth2User): UserInfoStandardClaimSet {
@@ -95,7 +95,7 @@ class JwtEncodingContextCustomizer: OAuth2TokenCustomizer<JwtEncodingContext> {
         override val emailVerified: Boolean? get() = user.attributes["email_verified"] as Boolean?
         override val givenName: String? get() = user.attributes["given_name"] as String?
         override val picture: String? get() = user.attributes["picture"] as String?
-        override val updatedAt: Long? get() = user.attributes["updated_at"]?.let { (it as Instant).epochSecond }
+        override val updatedAt: Date? get() = user.attributes["updated_at"]?.let { Date.from(it as Instant) }
         override val nickname: String? get() = user.attributes["nickname"] as String?
         override val name: String? get() = user.attributes["name"] as String?
         override val familyName: String? get() = user.attributes["family_name"] as String?

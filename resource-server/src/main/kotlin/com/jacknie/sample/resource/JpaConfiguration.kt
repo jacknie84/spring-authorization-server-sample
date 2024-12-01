@@ -15,6 +15,6 @@ class JpaConfiguration(private val authorRepository: AuthorRepository) {
     fun auditorAware() = AuditorAware {
         val context = SecurityContextHolder.getContext()
         val username = context.authentication.name
-        authorRepository.findById(username).or { Optional.of(authorRepository.save(Author(username, username))) }
+        authorRepository.findById(username).or { Optional.of(authorRepository.save(AuthorEntity(username, username))) }
     }
 }

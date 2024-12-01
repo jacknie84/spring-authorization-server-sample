@@ -9,6 +9,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 class DataRestConfiguration: RepositoryRestConfigurer {
 
     override fun configureRepositoryRestConfiguration(config: RepositoryRestConfiguration, cors: CorsRegistry?) {
-        config.exposeIdsFor(Post::class.java)
+        config.exposeIdsFor(PostEntity::class.java)
     }
 }

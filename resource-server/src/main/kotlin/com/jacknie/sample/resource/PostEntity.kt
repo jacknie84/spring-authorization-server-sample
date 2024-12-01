@@ -10,8 +10,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 
 @Entity
+@Table(name = "post")
 @EntityListeners(value = [AuditingEntityListener::class])
-data class Post(
+data class PostEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
@@ -24,12 +25,12 @@ data class Post(
     @CreatedBy
     @ManyToOne
     @JoinColumn(name = "createdUsername", referencedColumnName = "username", insertable = true, updatable = false)
-    var createdBy: Author? = null,
+    var createdBy: AuthorEntity? = null,
 
     @LastModifiedBy
     @ManyToOne
     @JoinColumn(name = "lastModifiedUsername", referencedColumnName = "username", insertable = true, updatable = true)
-    var lastModifiedBy: Author? = null,
+    var lastModifiedBy: AuthorEntity? = null,
 
     @CreatedDate
     @Column(nullable = false, insertable = true, updatable = false)
