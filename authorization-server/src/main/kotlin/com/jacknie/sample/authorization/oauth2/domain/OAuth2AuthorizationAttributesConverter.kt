@@ -1,4 +1,4 @@
-package com.jacknie.sample.authorization.oauth2.authorization.domain
+package com.jacknie.sample.authorization.oauth2.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

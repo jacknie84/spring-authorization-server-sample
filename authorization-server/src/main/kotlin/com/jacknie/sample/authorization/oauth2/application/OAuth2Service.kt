@@ -1,10 +1,10 @@
-package com.jacknie.sample.authorization.oauth2.authorization.adapter.framework
+package com.jacknie.sample.authorization.oauth2.application
 
-import com.jacknie.sample.authorization.oauth2.authorization.adapter.persistence.OAuth2AuthorizationRepository
-import com.jacknie.sample.authorization.oauth2.authorization.adapter.persistence.OAuth2AuthorizationTokenRepository
-import com.jacknie.sample.authorization.oauth2.authorization.domain.OAuth2AuthorizationEntity
-import com.jacknie.sample.authorization.oauth2.authorization.domain.OAuth2AuthorizationTokenEntity
-import com.jacknie.sample.authorization.oauth2.authorization.domain.OAuth2AuthorizationTokenId
+import com.jacknie.sample.authorization.oauth2.adapter.persistence.OAuth2AuthorizationRepository
+import com.jacknie.sample.authorization.oauth2.adapter.persistence.OAuth2AuthorizationTokenRepository
+import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationEntity
+import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenEntity
+import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenId
 import org.springframework.dao.DataRetrievalFailureException
 import org.springframework.security.oauth2.core.*
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
@@ -12,20 +12,19 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 
-@Component
-class JpaOAuth2AuthorizationService(
+@Service
+class OAuth2Service(
     private val authorizationRepository: OAuth2AuthorizationRepository,
     private val tokenRepository: OAuth2AuthorizationTokenRepository,
-    private val registeredClientRepository: RegisteredClientRepository
-): OAuth2AuthorizationService {
+    private val registeredClientRepository: RegisteredClientRepository,
+) {
 
-    override fun save(authorization: OAuth2Authorization) {
+    fun saveOAuth2Authorization(authorization: OAuth2Authorization) {
         var authorizationEntity = OAuth2AuthorizationEntity.from(authorization)
         authorizationEntity = authorizationRepository.save(authorizationEntity)
         val tokenEntities = TOKEN_HANDLERS
@@ -33,13 +32,13 @@ class JpaOAuth2AuthorizationService(
         tokenRepository.saveAll(tokenEntities)
     }
 
-    override fun remove(authorization: OAuth2Authorization) {
+    fun deleteOAuth2Authorization(authorization: OAuth2Authorization) {
         val tokenIds = TOKEN_HANDLERS.map { OAuth2AuthorizationTokenId(authorization.id, it.type) }
         tokenRepository.deleteAllById(tokenIds)
         authorizationRepository.deleteById(authorization.id)
     }
 
-    override fun findById(id: String): OAuth2Authorization? {
+    fun getOAuth2Authorization(id: String): OAuth2Authorization? {
         return authorizationRepository.findById(id)
             .map {
                 val tokenIds = TOKEN_HANDLERS.map { h -> OAuth2AuthorizationTokenId(id, h.type) }
@@ -49,7 +48,7 @@ class JpaOAuth2AuthorizationService(
             .orElse(null)
     }
 
-    override fun findByToken(token: String, tokenType: OAuth2TokenType?): OAuth2Authorization? {
+    fun getOAuth2Authorization(token: String, tokenType: OAuth2TokenType?): OAuth2Authorization? {
         return (tokenType
             ?.let { tokenRepository.findByValueAndType(token, it) }
             ?: tokenRepository.findByValue(token))
@@ -147,7 +146,8 @@ class JpaOAuth2AuthorizationService(
         }
     }
 
-    private abstract class AbstractOAuth2TokenConverter<T>: OAuth2TokenConverter<T, OAuth2Authorization.Token<out OAuth2Token>> {
+    private abstract class AbstractOAuth2TokenConverter<T>:
+        OAuth2TokenConverter<T, OAuth2Authorization.Token<out OAuth2Token>> {
         override fun convertToOAuth2AuthorizationTokenEntity(
             token: OAuth2Authorization.Token<out OAuth2Token>,
             authorizationEntity: OAuth2AuthorizationEntity
@@ -251,10 +251,10 @@ class JpaOAuth2AuthorizationService(
                 ?: emptySet()
         }
     }
-    
+
     private class OidcIdTokenConverter: AbstractOAuth2TokenConverter<OidcIdToken>() {
         private val idTokenClaimsHandler = OidcIdTokenClaimsHandler()
-        
+
         override val type: OAuth2TokenType get() = OAuth2TokenType(OidcParameterNames.ID_TOKEN)
         override val javaClass: Class<OidcIdToken> get() = OidcIdToken::class.java
 
@@ -263,7 +263,7 @@ class JpaOAuth2AuthorizationService(
             OidcIdToken(value, issuedAt, expiredAt, claims)
         }
     }
-    
+
     private class OidcIdTokenClaimsHandler: OAuth2TokenMetadataHandler<Map<String, Any>> {
         override fun setOAuth2AuthorizationTokenEntityMetadata(
             entity: OAuth2AuthorizationTokenEntity,
@@ -280,7 +280,7 @@ class JpaOAuth2AuthorizationService(
                 ?: emptyMap()
         }
     }
-    
+
     private class OAuth2RefreshTokenConverter: AbstractOAuth2TokenConverter<OAuth2RefreshToken>() {
         override val type: OAuth2TokenType get() = OAuth2TokenType.REFRESH_TOKEN
         override val javaClass: Class<OAuth2RefreshToken> get() = OAuth2RefreshToken::class.java
@@ -289,12 +289,12 @@ class JpaOAuth2AuthorizationService(
             OAuth2RefreshToken(value, issuedAt, expiredAt)
         }
     }
-    
+
     private class OAuth2UserCodeConverter: AbstractOAuth2TokenConverter<OAuth2UserCode>() {
         override val type: OAuth2TokenType get() = OAuth2TokenType(OAuth2ParameterNames.USER_CODE)
         override val javaClass: Class<OAuth2UserCode> get() = OAuth2UserCode::class.java
 
-        override fun convertToOAuth2Token(entity: OAuth2AuthorizationTokenEntity) = entity.run { 
+        override fun convertToOAuth2Token(entity: OAuth2AuthorizationTokenEntity) = entity.run {
             OAuth2UserCode(value, issuedAt, expiredAt)
         }
     }

@@ -1,4 +1,4 @@
-package com.jacknie.sample.authorization.oauth2.authorization.domain
+package com.jacknie.sample.authorization.oauth2.domain
 
 import jakarta.persistence.Column
 import jakarta.persistence.Convert

@@ -1,7 +1,7 @@
-package com.jacknie.sample.authorization.oauth2.authorization.adapter.persistence
+package com.jacknie.sample.authorization.oauth2.adapter.persistence
 
-import com.jacknie.sample.authorization.oauth2.authorization.domain.OAuth2AuthorizationTokenEntity
-import com.jacknie.sample.authorization.oauth2.authorization.domain.OAuth2AuthorizationTokenId
+import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenEntity
+import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenId
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import java.util.*
