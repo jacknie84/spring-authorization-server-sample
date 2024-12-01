@@ -51,13 +51,14 @@ class SecurityConfiguration {
     fun authorizationServerSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http)
         http.getConfigurer(OAuth2AuthorizationServerConfigurer::class.java).oidc(Customizer.withDefaults())
-        http.oauth2ResourceServer { it.opaqueToken { c -> c.introspector(opaqueTokenIntrospector(http)) } }
-        http.exceptionHandling {
-            val entryPoint = LoginUrlAuthenticationEntryPoint("/login")
-            val preferredMatcher = MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-            preferredMatcher.setIgnoredMediaTypes(setOf(MediaType.ALL))
-            it.defaultAuthenticationEntryPointFor(entryPoint, preferredMatcher)
-        }
+        http
+            .oauth2ResourceServer { it.opaqueToken { c -> c.introspector(opaqueTokenIntrospector(http)) } }
+            .exceptionHandling {
+                val entryPoint = LoginUrlAuthenticationEntryPoint("/login")
+                val preferredMatcher = MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                preferredMatcher.setIgnoredMediaTypes(setOf(MediaType.ALL))
+                it.defaultAuthenticationEntryPointFor(entryPoint, preferredMatcher)
+            }
         return http.build()
     }
 
@@ -101,4 +102,7 @@ class SecurityConfiguration {
         }
         return userService
     }
+
+    @Bean
+    fun jwtCustomizer() = JwtEncodingContextCustomizer()
 }

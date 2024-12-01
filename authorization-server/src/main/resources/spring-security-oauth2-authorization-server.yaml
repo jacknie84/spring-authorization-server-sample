@@ -13,31 +13,32 @@ spring:
         client:
           oidc-client:
             registration:
-              client-id: "oidc-client"
+              client-id: oidc-client
               client-secret: "{noop}secret"
               client-authentication-methods:
-                - "client_secret_basic"
+                - client_secret_basic
               authorization-grant-types:
-                - "authorization_code"
-                - "refresh_token"
+                - authorization_code
+                - refresh_token
               redirect-uris:
-                - "http://localhost:8070/login/oauth2/code/oidc-client"
-                - "https://oauth.pstmn.io/v1/callback"
+                - http://localhost:8070/login/oauth2/code/oidc-client
+                - https://oauth.pstmn.io/v1/callback
               post-logout-redirect-uris:
-                - "http://localhost:8070/"
+                - http://localhost:8070
               scopes:
-                - "openid"
-                - "profile"
+                - openid
+                - profile
+                - email
             require-authorization-consent: true
             token:
               access-token-format: reference
           oidc-resource-server:
             registration:
-              client-id: "oidc-resource-server"
+              client-id: oidc-resource-server
               client-secret: "{noop}secret2"
               client-authentication-methods:
-                - "client_secret_basic"
+                - client_secret_basic
               authorization-grant-types:
-                - "client_credentials"
+                - client_credentials
             token:
               access-token-format: reference
