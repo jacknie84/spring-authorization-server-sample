@@ -7,7 +7,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.stereotype.Component
 
 @Component
-class JpaOAuth2AuthorizationService(private val oauth2Service: OAuth2Service): OAuth2AuthorizationService {
+class OAuth2AuthorizationServiceImpl(private val oauth2Service: OAuth2Service): OAuth2AuthorizationService {
 
     override fun save(authorization: OAuth2Authorization) {
         oauth2Service.saveOAuth2Authorization(authorization)

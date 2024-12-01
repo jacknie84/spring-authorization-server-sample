@@ -1,5 +1,6 @@
 package com.jacknie.sample.authorization
 
+import com.jacknie.sample.authorization.oauth2.adapter.framework.OAuth2UserAttributesConverterProvider
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
@@ -7,7 +8,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.core.convert.converter.Converter
 import org.springframework.http.MediaType
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -81,28 +81,16 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun oidcUserService(): OidcUserService {
+    fun oidcUserService(oauth2UserService: OAuth2UserService<OAuth2UserRequest, OAuth2User>): OidcUserService {
         val oidcUserService = OidcUserService()
-        oidcUserService.setOauth2UserService(oauth2UserService())
+        oidcUserService.setOauth2UserService(oauth2UserService)
         return oidcUserService
     }
 
     @Bean
-    fun oauth2UserService(): OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+    fun oauth2UserService(provider: OAuth2UserAttributesConverterProvider): OAuth2UserService<OAuth2UserRequest, OAuth2User> {
         val userService = DefaultOAuth2UserService()
-        userService.setAttributesConverter { request ->
-            if (request.clientRegistration.registrationId == "naver") {
-                Converter {
-                    val response = it["response"] as Map<*, *>
-                    response.entries.associate { (k, v) -> k.toString() to v }
-                }
-            } else {
-                Converter { it }
-            }
-        }
+        userService.setAttributesConverter(provider::getUserAttributesConverter)
         return userService
     }
-
-    @Bean
-    fun jwtCustomizer() = JwtEncodingContextCustomizer()
 }

@@ -1,12 +1,18 @@
 package com.jacknie.sample.authorization.oauth2.application
 
+import com.jacknie.sample.authorization.oauth2.adapter.framework.JwtEncodingContextCustomizer.*
 import com.jacknie.sample.authorization.oauth2.adapter.persistence.OAuth2AuthorizationRepository
 import com.jacknie.sample.authorization.oauth2.adapter.persistence.OAuth2AuthorizationTokenRepository
+import com.jacknie.sample.authorization.oauth2.application.oidc.OidcStandardClaimSet
+import com.jacknie.sample.authorization.oauth2.application.oidc.impl.*
 import com.jacknie.sample.authorization.oauth2.application.token.impl.*
 import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationEntity
 import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenEntity
 import com.jacknie.sample.authorization.oauth2.domain.OAuth2AuthorizationTokenId
+import org.springframework.core.convert.converter.Converter
 import org.springframework.dao.DataRetrievalFailureException
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
@@ -63,6 +69,31 @@ class OAuth2Service(
             .map { it.authorization to tokenRepository.findAllByAuthorizationId(it.authorizationId) }
             .map { buildOAuth2Authorization(it.first, it.second) }
             .orElse(null)
+    }
+
+    fun getOidcStandardClaimSet(token: OAuth2AuthenticationToken): OidcStandardClaimSet {
+        return when (token.authorizedClientRegistrationId) {
+            "github" -> GithubClaimSet(token.principal)
+            "naver" -> NaverClaimSet(token.principal)
+            "okta" -> OktaClaimSet(token.principal)
+            "kakao" -> KakaoClaimSet(token.principal)
+            "google" -> GoogleClaimSet(token.principal)
+            else -> NoopClaimSet()
+        }
+    }
+
+    fun getUserAttributesConverter(source: OAuth2UserRequest): Converter<Map<String, Any>, Map<String, Any>> {
+        return if (source.clientRegistration.registrationId == "naver") {
+            Converter {
+                val response = it["response"] as Map<*, *>
+                response
+                    .filter { (k, v) -> k != null && v != null }
+                    .map { (k, v) -> k.toString() to v!! }
+                    .toMap()
+            }
+        } else {
+            Converter { it }
+        }
     }
 
     private fun buildOAuth2Authorization(authorizationEntity: OAuth2AuthorizationEntity, tokenEntities: List<OAuth2AuthorizationTokenEntity>): OAuth2Authorization {
