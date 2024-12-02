@@ -1,0 +1,10 @@
+package com.jacknie.sample.authorization.oauth2.adapter.framework.authorization
+
+import org.springframework.security.oauth2.core.OAuth2Token
+import org.springframework.security.oauth2.server.authorization.OAuth2Authorization
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService
+
+typealias FrameworkOAuth2AuthorizationService = OAuth2AuthorizationService
+typealias FrameworkOAuth2Authorization = OAuth2Authorization
+typealias FrameworkOAuth2AuthorizationBuilder = OAuth2Authorization.Builder
+typealias FrameworkOAuth2AuthorizationToken = OAuth2Authorization.Token<out OAuth2Token>

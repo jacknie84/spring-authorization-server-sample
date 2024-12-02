@@ -1,11 +1,18 @@
 package com.jacknie.sample.authorization.oauth2.domain
 
+import com.jacknie.sample.authorization.oauth2.application.authorization.OAuth2Authorization
 import jakarta.persistence.*
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType
 import java.time.Instant
 
 @Entity
-@Table(name = "oauth2_authorization_token", indexes = [Index(columnList = "authorizationId")])
+@Table(
+    name = "oauth2_authorization_token",
+    indexes = [
+        Index(columnList = "authorizationId"),
+        Index(columnList = "tokenValue"),
+        Index(columnList = "tokenValue, type"),
+    ]
+)
 @IdClass(OAuth2AuthorizationTokenId::class)
 data class OAuth2AuthorizationTokenEntity(
 
@@ -13,9 +20,9 @@ data class OAuth2AuthorizationTokenEntity(
     val authorizationId: String,
 
     @Id
-    val type: OAuth2TokenType,
+    val type: String,
 
-    @Column(name = "tokenValue", length = 1024 * 4, unique = true)
+    @Column(name = "tokenValue", length = 1024 * 4)
     val value: String,
 
     val issuedAt: Instant?,
@@ -29,4 +36,10 @@ data class OAuth2AuthorizationTokenEntity(
     @ManyToOne(optional = false)
     @JoinColumn(name = "authorizationId", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     val authorization: OAuth2AuthorizationEntity,
-)
+) {
+    companion object {
+        fun from(token: OAuth2Authorization.Token, authorization: OAuth2AuthorizationEntity) = token.run {
+            OAuth2AuthorizationTokenEntity(authorization.id, type, value, issuedAt, expiredAt, metadata, authorization)
+        }
+    }
+}
